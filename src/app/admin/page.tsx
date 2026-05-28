@@ -1,7 +1,7 @@
 import {
+  Banknote,
   BookOpen,
   CreditCard,
-  DollarSign,
   Home,
   TrendingUp,
   Users,
@@ -9,47 +9,49 @@ import {
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { getCurrentUser, requireRole } from '@/lib/auth';
+import { getServerTranslation } from '@/lib/server-translation';
+import { formatRupiah } from '@/lib/currency';
 import { adminService } from '@/services/admin.service';
 
 export default async function AdminDashboardPage() {
-  const user = await getCurrentUser();
+  const [user, { t }] = await Promise.all([getCurrentUser(), getServerTranslation()]);
   requireRole(user, 'ADMIN');
 
   const analytics = await adminService.getAnalytics();
 
   const cards = [
     {
-      title: 'Total Revenue',
-      value: `$${analytics.totalRevenue.toLocaleString()}`,
-      icon: DollarSign,
+      title: t('admin.analytics.total_revenue'),
+      value: formatRupiah(analytics.totalRevenue),
+      icon: Banknote,
       color: 'text-green-600',
     },
     {
-      title: 'Active Bookings',
+      title: t('admin.analytics.active_bookings'),
       value: analytics.activeBookings.toString(),
       icon: TrendingUp,
       color: 'text-ocean',
     },
     {
-      title: 'Total Bookings',
+      title: t('admin.analytics.total_bookings'),
       value: analytics.totalBookings.toString(),
       icon: BookOpen,
       color: 'text-blue-600',
     },
     {
-      title: 'Total Users',
+      title: t('admin.analytics.total_users'),
       value: analytics.totalUsers.toString(),
       icon: Users,
       color: 'text-purple-600',
     },
     {
-      title: 'Total Villas',
+      title: t('admin.analytics.total_villas'),
       value: analytics.totalVillas.toString(),
       icon: Home,
       color: 'text-amber-600',
     },
     {
-      title: 'Pending Transactions',
+      title: t('admin.analytics.pending_transactions'),
       value: (
         analytics.pendingDeposits + analytics.pendingWithdrawals
       ).toString(),
@@ -61,9 +63,9 @@ export default async function AdminDashboardPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold tracking-tight">Analytics</h1>
+        <h1 className="text-2xl font-bold tracking-tight">{t('admin.analytics.title')}</h1>
         <p className="text-muted-foreground mt-1">
-          Platform overview and key metrics
+          {t('admin.analytics.subtitle')}
         </p>
       </div>
 

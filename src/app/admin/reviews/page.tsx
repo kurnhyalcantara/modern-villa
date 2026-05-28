@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { Suspense } from 'react';
 
 import { DataTableSkeleton } from '@/components/data-table';
+import { getServerTranslation } from '@/lib/server-translation';
 
 import { ReviewTable } from './review-table';
 
@@ -12,14 +13,14 @@ interface Props {
 }
 
 export default async function AdminReviewsPage({ searchParams }: Props) {
-  const params = await searchParams;
+  const [params, { t }] = await Promise.all([searchParams, getServerTranslation()]);
 
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold tracking-tight">Review Moderation</h1>
+        <h1 className="text-2xl font-bold tracking-tight">{t('admin.reviews.title')}</h1>
         <p className="text-muted-foreground mt-1">
-          Monitor and moderate user reviews
+          {t('admin.reviews.subtitle')}
         </p>
       </div>
       <Suspense fallback={<DataTableSkeleton />}>

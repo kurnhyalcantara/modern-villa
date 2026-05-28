@@ -11,6 +11,6 @@ export const POST = withErrorHandler(async (request: NextRequest) => {
   const user = await getCurrentUser();
   const body = await request.json();
   const input = validate(depositSchema, body);
-  const deposit = await financeService.deposit(user.id, input);
+  const deposit = await financeService.createDeposit(user.id, input);
   return successResponse(deposit, 201);
 });

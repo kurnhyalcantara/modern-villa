@@ -4,6 +4,7 @@ import { Suspense } from 'react';
 
 import { DataTableSkeleton } from '@/components/data-table';
 import { buttonVariants } from '@/components/ui/button';
+import { getServerTranslation } from '@/lib/server-translation';
 import { cn } from '@/lib/utils';
 
 import { VillaTable } from './villa-table';
@@ -15,17 +16,17 @@ interface Props {
 }
 
 export default async function AdminVillasPage({ searchParams }: Props) {
-  const params = await searchParams;
+  const [params, { t }] = await Promise.all([searchParams, getServerTranslation()]);
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">
-            Villa Management
+            {t('admin.villas.title')}
           </h1>
           <p className="text-muted-foreground mt-1">
-            Create, edit, and manage villas
+            {t('admin.villas.subtitle')}
           </p>
         </div>
         <Link
@@ -35,7 +36,7 @@ export default async function AdminVillasPage({ searchParams }: Props) {
             'bg-ocean hover:bg-ocean/90 text-white',
           )}
         >
-          Add Villa
+          {t('admin.villas.add')}
         </Link>
       </div>
 

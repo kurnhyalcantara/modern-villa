@@ -4,17 +4,19 @@ import Link from 'next/link';
 import { buttonVariants } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { getCurrentUser } from '@/lib/auth';
+import { getServerTranslation } from '@/lib/server-translation';
+import { formatRupiah } from '@/lib/currency';
 import { cn } from '@/lib/utils';
 
 export default async function DashboardPage() {
-  const user = await getCurrentUser();
+  const [user, { t }] = await Promise.all([getCurrentUser(), getServerTranslation()]);
 
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
+        <h1 className="text-3xl font-bold tracking-tight">{t('dashboard.title')}</h1>
         <p className="text-muted-foreground mt-1">
-          Welcome back, {user.fullName}
+          {t('dashboard.welcome', { name: user.fullName })}
         </p>
       </div>
 
@@ -22,26 +24,26 @@ export default async function DashboardPage() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium">
-              Wallet Balance
+              {t('dashboard.wallet_balance')}
             </CardTitle>
             <Wallet className="text-muted-foreground size-4" />
           </CardHeader>
           <CardContent>
             <p className="text-ocean text-2xl font-bold">
-              ${Number(user.balance).toLocaleString()}
+              {formatRupiah(user.balance)}
             </p>
             <Link
               href="/dashboard/wallet"
               className="text-muted-foreground mt-1 inline-block text-xs hover:underline"
             >
-              Manage wallet →
+              {t('dashboard.manage_wallet')}
             </Link>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">My Bookings</CardTitle>
+            <CardTitle className="text-sm font-medium">{t('dashboard.my_bookings')}</CardTitle>
             <CalendarDays className="text-muted-foreground size-4" />
           </CardHeader>
           <CardContent>
@@ -52,14 +54,14 @@ export default async function DashboardPage() {
                 'mt-1',
               )}
             >
-              View bookings
+              {t('dashboard.view_bookings')}
             </Link>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">Transactions</CardTitle>
+            <CardTitle className="text-sm font-medium">{t('dashboard.transactions_title')}</CardTitle>
             <CreditCard className="text-muted-foreground size-4" />
           </CardHeader>
           <CardContent>
@@ -70,7 +72,7 @@ export default async function DashboardPage() {
                 'mt-1',
               )}
             >
-              View history
+              {t('dashboard.view_history')}
             </Link>
           </CardContent>
         </Card>

@@ -14,6 +14,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { GUEST_OPTIONS, LOCATIONS, SORT_OPTIONS } from '@/constants/villa';
+import { useTranslation } from '@/hooks/use-translation';
 import type { VillaFilterParams } from '@/types/villa';
 
 interface VillaFiltersProps {
@@ -28,6 +29,7 @@ export function VillaFilters({
   const router = useRouter();
   const searchParams = useSearchParams();
   const [isPending, startTransition] = useTransition();
+  const { t } = useTranslation();
   const [search, setSearch] = useState(currentFilters.search ?? '');
   const [showFilters, setShowFilters] = useState(false);
 
@@ -76,7 +78,7 @@ export function VillaFilters({
           <Search className="text-muted-foreground pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2" />
           <Input
             type="search"
-            placeholder="Search villas by name, location..."
+            placeholder={t('villas.search_placeholder')}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
@@ -91,7 +93,7 @@ export function VillaFilters({
             onClick={handleSearch}
             disabled={isPending}
           >
-            Search
+            {t('villas.search')}
           </Button>
 
           <Button
@@ -101,7 +103,7 @@ export function VillaFilters({
             className="gap-1.5"
           >
             <SlidersHorizontal className="size-4" />
-            <span className="hidden sm:inline">Filters</span>
+            <span className="hidden sm:inline">{t('villas.filters')}</span>
           </Button>
 
           {hasFilters && (
@@ -112,7 +114,7 @@ export function VillaFilters({
               className="gap-1.5"
             >
               <RotateCcw className="size-3.5" />
-              Reset
+              {t('villas.reset')}
             </Button>
           )}
         </div>
@@ -121,7 +123,7 @@ export function VillaFilters({
       {showFilters && (
         <div className="bg-muted/50 grid grid-cols-1 gap-3 rounded-lg border p-4 sm:grid-cols-2 lg:grid-cols-4">
           <div className="space-y-1.5">
-            <label className="text-sm font-medium">Location</label>
+            <label className="text-sm font-medium">{t('villas.location')}</label>
             <Select
               value={currentFilters.location ?? 'all'}
               onValueChange={(v) =>
@@ -129,10 +131,10 @@ export function VillaFilters({
               }
             >
               <SelectTrigger className="w-full">
-                <SelectValue placeholder="All locations" />
+                <SelectValue placeholder={t('villas.all_locations')} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All locations</SelectItem>
+                <SelectItem value="all">{t('villas.all_locations')}</SelectItem>
                 {LOCATIONS.map((loc) => (
                   <SelectItem key={loc} value={loc}>
                     {loc}
@@ -143,7 +145,7 @@ export function VillaFilters({
           </div>
 
           <div className="space-y-1.5">
-            <label className="text-sm font-medium">Guests</label>
+            <label className="text-sm font-medium">{t('villas.guests')}</label>
             <Select
               value={currentFilters.guests?.toString() ?? 'any'}
               onValueChange={(v) =>
@@ -151,13 +153,13 @@ export function VillaFilters({
               }
             >
               <SelectTrigger className="w-full">
-                <SelectValue placeholder="Any" />
+                <SelectValue placeholder={t('villas.any')} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="any">Any</SelectItem>
+                <SelectItem value="any">{t('villas.any')}</SelectItem>
                 {GUEST_OPTIONS.map((g) => (
                   <SelectItem key={g} value={g.toString()}>
-                    {g}+ guests
+                    {t('villas.guests_plus', { count: g })}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -165,7 +167,7 @@ export function VillaFilters({
           </div>
 
           <div className="space-y-1.5">
-            <label className="text-sm font-medium">Sort By</label>
+            <label className="text-sm font-medium">{t('villas.sort_by')}</label>
             <Select
               value={currentFilters.sort ?? 'newest'}
               onValueChange={(v) =>
@@ -187,7 +189,9 @@ export function VillaFilters({
 
           <div className="flex items-end">
             <div className="text-muted-foreground text-sm">
-              {totalResults} {totalResults === 1 ? 'villa' : 'villas'} found
+              {totalResults === 1
+                ? t('villas.result_count', { count: totalResults })
+                : t('villas.results_count', { count: totalResults })}
             </div>
           </div>
         </div>
@@ -195,7 +199,9 @@ export function VillaFilters({
 
       {!showFilters && (
         <div className="text-muted-foreground text-sm">
-          {totalResults} {totalResults === 1 ? 'villa' : 'villas'} found
+          {totalResults === 1
+            ? t('villas.result_count', { count: totalResults })
+            : t('villas.results_count', { count: totalResults })}
         </div>
       )}
     </div>

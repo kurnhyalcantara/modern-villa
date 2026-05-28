@@ -1,5 +1,4 @@
-import { BadRequestError, NotFoundError } from '@/lib/errors';
-import { withTransaction } from '@/lib/transaction';
+import { NotFoundError } from '@/lib/errors';
 import { adminLogRepository } from '@/repositories/admin-log.repository';
 import { bookingRepository } from '@/repositories/booking.repository';
 import { depositRepository } from '@/repositories/deposit.repository';
@@ -260,8 +259,9 @@ export const adminService = {
         ? {
             status: params.status as
               | 'PENDING'
-              | 'SUCCESS'
-              | 'FAILED'
+              | 'PENDING_VERIFICATION'
+              | 'APPROVED'
+              | 'REJECTED'
               | 'CANCELLED',
           }
         : {}),
@@ -281,34 +281,8 @@ export const adminService = {
   },
 
   async approveDeposit(adminId: string, depositId: string) {
-    return withTransaction(async (tx) => {
-      const deposit = await tx.deposit.findUnique({
-        where: { id: depositId },
-      });
-      if (!deposit) throw new NotFoundError('Deposit not found');
-      if (deposit.status !== 'PENDING') {
-        throw new BadRequestError('Deposit is not pending');
-      }
-
-      await tx.user.update({
-        where: { id: deposit.userId },
-        data: { balance: { increment: deposit.amount } },
-      });
-
-      const updated = await tx.deposit.update({
-        where: { id: depositId },
-        data: { status: 'SUCCESS' },
-      });
-
-      await tx.adminLog.create({
-        data: {
-          admin: { connect: { id: adminId } },
-          action: `Approved deposit ${depositId} of $${Number(deposit.amount)}`,
-        },
-      });
-
-      return updated;
-    });
+    const { financeService } = await import('@/services/finance.service');
+    return financeService.adminReviewDeposit(adminId, depositId, { action: 'approve' });
   },
 
   async getWithdrawals(params: {
@@ -321,9 +295,10 @@ export const adminService = {
         ? {
             status: params.status as
               | 'PENDING'
-              | 'SUCCESS'
-              | 'FAILED'
-              | 'CANCELLED',
+              | 'PROCESSING'
+              | 'APPROVED'
+              | 'REJECTED'
+              | 'COMPLETED',
           }
         : {}),
     };
@@ -342,28 +317,7 @@ export const adminService = {
   },
 
   async approveWithdrawal(adminId: string, withdrawalId: string) {
-    return withTransaction(async (tx) => {
-      const withdrawal = await tx.withdrawal.findUnique({
-        where: { id: withdrawalId },
-      });
-      if (!withdrawal) throw new NotFoundError('Withdrawal not found');
-      if (withdrawal.status !== 'PENDING') {
-        throw new BadRequestError('Withdrawal is not pending');
-      }
-
-      const updated = await tx.withdrawal.update({
-        where: { id: withdrawalId },
-        data: { status: 'SUCCESS' },
-      });
-
-      await tx.adminLog.create({
-        data: {
-          admin: { connect: { id: adminId } },
-          action: `Approved withdrawal ${withdrawalId} of $${Number(withdrawal.amount)}`,
-        },
-      });
-
-      return updated;
-    });
+    const { financeService } = await import('@/services/finance.service');
+    return financeService.adminReviewWithdrawal(adminId, withdrawalId, { action: 'approve' });
   },
 };

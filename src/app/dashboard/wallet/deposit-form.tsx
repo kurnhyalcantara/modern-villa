@@ -1,6 +1,6 @@
 'use client';
 
-import { Loader2, Plus } from 'lucide-react';
+import { CreditCard, Loader2, Plus, Zap } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useCallback, useState } from 'react';
 import { toast } from 'sonner';
@@ -8,18 +8,28 @@ import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
+import {
+  useDepositGatewayEnabled,
+  useDepositManualEnabled,
+} from '@/hooks/use-feature-flags';
+import { useTranslation } from '@/hooks/use-translation';
 
 export function DepositForm() {
   const router = useRouter();
+  const { t } = useTranslation();
   const [amount, setAmount] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const handleSubmit = useCallback(
+  const manualEnabled = useDepositManualEnabled();
+  const gatewayEnabled = useDepositGatewayEnabled();
+  const hasAnyMode = manualEnabled || gatewayEnabled;
+
+  const handleManualDeposit = useCallback(
     async (e: React.FormEvent) => {
       e.preventDefault();
       const num = Number(amount);
       if (!num || num <= 0) {
-        toast.error('Enter a valid amount');
+        toast.error(t('toast.enter_valid_amount'));
         return;
       }
 
@@ -34,20 +44,32 @@ export function DepositForm() {
         const data = await res.json();
 
         if (!res.ok) {
-          toast.error(data.message ?? 'Deposit failed');
+          toast.error(data.message ?? t('toast.deposit_failed'));
           return;
         }
 
-        toast.success(`$${num.toLocaleString()} deposited successfully`);
-        setAmount('');
-        router.refresh();
+        toast.success(t('toast.deposit_created'));
+        router.push(`/dashboard/deposit/${data.data.id}`);
       } catch {
-        toast.error('Something went wrong');
+        toast.error(t('toast.something_wrong'));
       } finally {
         setLoading(false);
       }
     },
-    [amount, router],
+    [amount, router, t],
+  );
+
+  const handleGatewayDeposit = useCallback(
+    async (e: React.FormEvent) => {
+      e.preventDefault();
+      const num = Number(amount);
+      if (!num || num <= 0) {
+        toast.error(t('toast.enter_valid_amount'));
+        return;
+      }
+      toast.info(t('toast.gateway_coming_soon'));
+    },
+    [amount],
   );
 
   return (
@@ -55,36 +77,64 @@ export function DepositForm() {
       <CardHeader className="pb-3">
         <CardTitle className="flex items-center gap-2 text-base">
           <Plus className="size-4" />
-          Deposit
+          {t('wallet.deposit')}
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <form onSubmit={handleSubmit} className="space-y-3">
-          <div className="space-y-1.5">
-            <label htmlFor="deposit-amount" className="text-sm font-medium">
-              Amount ($)
-            </label>
-            <Input
-              id="deposit-amount"
-              type="number"
-              min="1"
-              step="0.01"
-              placeholder="0.00"
-              value={amount}
-              onChange={(e) => setAmount(e.target.value)}
-              disabled={loading}
-            />
-          </div>
-          <Button
-            type="submit"
-            size="sm"
-            disabled={loading || !amount}
-            className="bg-ocean hover:bg-ocean/90 w-full text-white"
+        {!hasAnyMode ? (
+          <p className="text-muted-foreground py-4 text-center text-sm">
+            {t('wallet.deposits_unavailable')}
+          </p>
+        ) : (
+          <form
+            onSubmit={manualEnabled ? handleManualDeposit : handleGatewayDeposit}
+            className="space-y-3"
           >
-            {loading && <Loader2 className="size-3.5 animate-spin" />}
-            Deposit
-          </Button>
-        </form>
+            <div className="space-y-1.5">
+              <label htmlFor="deposit-amount" className="text-sm font-medium">
+                {t('wallet.amount')}
+              </label>
+              <Input
+                id="deposit-amount"
+                type="number"
+                min="1"
+                step="0.01"
+                placeholder="0.00"
+                value={amount}
+                onChange={(e) => setAmount(e.target.value)}
+                disabled={loading}
+              />
+            </div>
+            {manualEnabled && (
+              <Button
+                type="submit"
+                size="sm"
+                disabled={loading || !amount}
+                className="bg-ocean hover:bg-ocean/90 w-full text-white"
+              >
+                {loading ? (
+                  <Loader2 className="size-3.5 animate-spin" />
+                ) : (
+                  <CreditCard className="size-3.5" />
+                )}
+                {t('wallet.deposit_transfer')}
+              </Button>
+            )}
+            {gatewayEnabled && (
+              <Button
+                type="button"
+                size="sm"
+                variant="outline"
+                disabled={loading || !amount}
+                className="w-full"
+                onClick={handleGatewayDeposit}
+              >
+                <Zap className="size-3.5" />
+                {t('wallet.pay_with_gateway')}
+              </Button>
+            )}
+          </form>
+        )}
       </CardContent>
     </Card>
   );

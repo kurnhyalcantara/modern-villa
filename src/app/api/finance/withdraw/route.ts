@@ -11,6 +11,6 @@ export const POST = withErrorHandler(async (request: NextRequest) => {
   const user = await getCurrentUser();
   const body = await request.json();
   const input = validate(withdrawSchema, body);
-  const withdrawal = await financeService.withdraw(user.id, input);
+  const withdrawal = await financeService.createWithdrawal(user.id, input);
   return successResponse(withdrawal, 201);
 });

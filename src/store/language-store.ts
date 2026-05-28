@@ -16,7 +16,7 @@ interface LanguageState {
 }
 
 export const useLanguageStore = create<LanguageState>((set, get) => ({
-  locale: 'en',
+  locale: 'id',
   languages: [],
   translations: {},
   isLoading: false,

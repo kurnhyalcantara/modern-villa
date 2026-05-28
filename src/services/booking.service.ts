@@ -4,6 +4,7 @@ import {
   ForbiddenError,
   NotFoundError,
 } from '@/lib/errors';
+import { formatRupiah } from '@/lib/currency';
 import { withTransaction } from '@/lib/transaction';
 import { bookingRepository } from '@/repositories/booking.repository';
 import type {
@@ -137,7 +138,7 @@ export const bookingService = {
         data: {
           user: { connect: { id: userId } },
           title: 'Booking Confirmed',
-          message: `Your booking has been confirmed. Payment of $${Number(booking.totalPrice).toLocaleString()} received.`,
+          message: `Your booking has been confirmed. Payment of ${formatRupiah(Number(booking.totalPrice))} received.`,
         },
       });
 

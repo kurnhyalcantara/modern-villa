@@ -3,6 +3,7 @@ import { MessageSquare } from 'lucide-react';
 import { EmptyState } from '@/components/empty-state';
 import { Rating } from '@/components/rating';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { getServerTranslation } from '@/lib/server-translation';
 import type { VillaReview } from '@/types/villa';
 
 interface ReviewListProps {
@@ -11,12 +12,13 @@ interface ReviewListProps {
   count: number;
 }
 
-export function ReviewList({ reviews, rating, count }: ReviewListProps) {
+export async function ReviewList({ reviews, rating, count }: ReviewListProps) {
+  const { t } = await getServerTranslation();
   return (
     <div>
       <div className="mb-6 flex items-center justify-between">
         <h2 className="text-xl font-semibold">
-          Reviews
+          {t('reviews.title')}
           {count > 0 && (
             <span className="text-muted-foreground ml-2 text-base font-normal">
               ({count})
@@ -40,8 +42,8 @@ export function ReviewList({ reviews, rating, count }: ReviewListProps) {
       ) : (
         <EmptyState
           icon={MessageSquare}
-          title="No reviews yet"
-          description="Be the first to review this villa after your stay."
+          title={t('reviews.empty_title')}
+          description={t('reviews.empty_description')}
         />
       )}
     </div>

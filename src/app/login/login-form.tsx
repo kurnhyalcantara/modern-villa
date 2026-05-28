@@ -35,9 +35,9 @@ export function LoginForm({ redirect, error }: LoginFormProps) {
 
   useEffect(() => {
     if (error === 'auth_failed') {
-      toast.error('Authentication failed. Please try again.');
+      toast.error(t('toast.auth_failed'));
     } else if (error === 'missing_code') {
-      toast.error('Invalid OAuth callback. Please try again.');
+      toast.error(t('toast.invalid_oauth'));
     }
   }, [error]);
 
@@ -56,20 +56,20 @@ export function LoginForm({ redirect, error }: LoginFormProps) {
         const data = await res.json();
 
         if (!res.ok) {
-          toast.error(data.message ?? 'Login failed');
+          toast.error(data.message ?? t('toast.login_failed'));
           return;
         }
 
-        toast.success('Welcome back!');
+        toast.success(t('toast.welcome_back'));
         router.push(redirect ?? '/dashboard');
         router.refresh();
       } catch {
-        toast.error('Something went wrong');
+        toast.error(t('toast.something_wrong'));
       } finally {
         setLoading(false);
       }
     },
-    [email, password, redirect, router],
+    [email, password, redirect, router, t],
   );
 
   const handleGoogleLogin = useCallback(async () => {
@@ -79,16 +79,16 @@ export function LoginForm({ redirect, error }: LoginFormProps) {
       const data = await res.json();
 
       if (!res.ok) {
-        toast.error(data.message ?? 'Failed to start Google login');
+        toast.error(data.message ?? t('toast.google_login_failed'));
         return;
       }
 
       window.location.href = data.data.url;
     } catch {
-      toast.error('Something went wrong');
+      toast.error(t('toast.something_wrong'));
       setGoogleLoading(false);
     }
-  }, []);
+  }, [t]);
 
   const isLoading = loading || googleLoading;
 

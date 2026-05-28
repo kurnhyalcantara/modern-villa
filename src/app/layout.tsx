@@ -5,7 +5,9 @@ import { Geist, Geist_Mono } from 'next/font/google';
 import { Footer } from '@/components/layout/footer';
 import { Navbar } from '@/components/layout/navbar';
 import { getCurrentUserOrNull } from '@/lib/auth';
+import { FeatureFlagProvider } from '@/providers/feature-flag-provider';
 import { I18nProvider } from '@/providers/i18n-provider';
+import { featureFlagService } from '@/services/feature-flag.service';
 import { i18nService } from '@/services/i18n.service';
 import { Toaster } from '@/components/ui/sonner';
 
@@ -50,9 +52,10 @@ export default async function RootLayout({
   const localeCookie = cookieStore.get('locale')?.value;
   const locale = localeCookie ?? (await i18nService.getDefaultLocale());
 
-  const [languages, translations] = await Promise.all([
+  const [languages, translations, featureFlags] = await Promise.all([
     i18nService.getActiveLanguages(),
     i18nService.getDictionary(locale),
+    featureFlagService.getActiveFlags(),
   ]);
 
   const navUser = currentUser
@@ -74,16 +77,18 @@ export default async function RootLayout({
         className="bg-background text-foreground flex min-h-screen flex-col antialiased"
         suppressHydrationWarning
       >
-        <I18nProvider
-          locale={locale}
-          languages={languages}
-          translations={translations}
-        >
-          <Navbar user={navUser} />
-          <main className="flex-1">{children}</main>
-          <Footer />
-          <Toaster position="bottom-right" richColors closeButton />
-        </I18nProvider>
+        <FeatureFlagProvider flags={featureFlags}>
+          <I18nProvider
+            locale={locale}
+            languages={languages}
+            translations={translations}
+          >
+            <Navbar user={navUser} />
+            <main className="flex-1">{children}</main>
+            <Footer />
+            <Toaster position="bottom-right" richColors closeButton />
+          </I18nProvider>
+        </FeatureFlagProvider>
       </body>
     </html>
   );

@@ -3,6 +3,8 @@ import Link from 'next/link';
 import { type Column, DataTable } from '@/components/data-table';
 import { Badge } from '@/components/ui/badge';
 import { getCurrentUser, requireRole } from '@/lib/auth';
+import { getServerTranslation } from '@/lib/server-translation';
+import { formatRupiah } from '@/lib/currency';
 import { adminService } from '@/services/admin.service';
 
 import { AdminPagination } from '../_components/admin-pagination';
@@ -19,49 +21,49 @@ interface VillaRow {
   createdAt: Date;
 }
 
-const columns: Column<VillaRow>[] = [
-  {
-    key: 'title',
-    header: 'Title',
-    render: (row) => (
-      <Link
-        href={`/admin/villas/${row.id}/edit`}
-        className="text-ocean font-medium hover:underline"
-      >
-        {row.title}
-      </Link>
-    ),
-  },
-  {
-    key: 'location',
-    header: 'Location',
-    render: (row) => row.location,
-  },
-  {
-    key: 'price',
-    header: 'Price/Night',
-    render: (row) => `$${Number(row.pricePerNight).toLocaleString()}`,
-  },
-  {
-    key: 'guests',
-    header: 'Guests',
-    render: (row) => <Badge variant="secondary">{row.maxGuests}</Badge>,
-  },
-  {
-    key: 'actions',
-    header: '',
-    className: 'text-right',
-    render: (row) => <VillaDeleteButton villaId={row.id} title={row.title} />,
-  },
-];
-
 interface Props {
   searchParams: Record<string, string | string[] | undefined>;
 }
 
 export async function VillaTable({ searchParams }: Props) {
-  const user = await getCurrentUser();
+  const [user, { t }] = await Promise.all([getCurrentUser(), getServerTranslation()]);
   requireRole(user, 'ADMIN');
+
+  const columns: Column<VillaRow>[] = [
+    {
+      key: 'title',
+      header: t('admin.villas.col_title'),
+      render: (row) => (
+        <Link
+          href={`/admin/villas/${row.id}/edit`}
+          className="text-ocean font-medium hover:underline"
+        >
+          {row.title}
+        </Link>
+      ),
+    },
+    {
+      key: 'location',
+      header: t('admin.villas.col_location'),
+      render: (row) => row.location,
+    },
+    {
+      key: 'price',
+      header: t('admin.villas.col_price'),
+      render: (row) => formatRupiah(row.pricePerNight),
+    },
+    {
+      key: 'guests',
+      header: t('admin.villas.col_guests'),
+      render: (row) => <Badge variant="secondary">{row.maxGuests}</Badge>,
+    },
+    {
+      key: 'actions',
+      header: '',
+      className: 'text-right',
+      render: (row) => <VillaDeleteButton villaId={row.id} title={row.title} />,
+    },
+  ];
 
   const page = Number(searchParams.page) || 1;
   const search =
@@ -75,12 +77,12 @@ export async function VillaTable({ searchParams }: Props) {
 
   return (
     <div className="space-y-4">
-      <SearchForm basePath="/admin/villas" placeholder="Search villas..." />
+      <SearchForm basePath="/admin/villas" placeholder={t('admin.villas.search')} />
       <DataTable
         columns={columns}
         data={villas}
         keyExtractor={(v) => v.id}
-        emptyMessage="No villas found."
+        emptyMessage={t('admin.villas.empty')}
       />
       <AdminPagination
         currentPage={page}

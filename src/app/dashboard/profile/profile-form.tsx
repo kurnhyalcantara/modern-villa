@@ -8,6 +8,7 @@ import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
+import { useTranslation } from '@/hooks/use-translation';
 
 interface ProfileFormProps {
   defaultValues: { fullName: string };
@@ -16,6 +17,7 @@ interface ProfileFormProps {
 
 export function ProfileForm({ defaultValues, email }: ProfileFormProps) {
   const router = useRouter();
+  const { t } = useTranslation();
   const [fullName, setFullName] = useState(defaultValues.fullName);
   const [loading, setLoading] = useState(false);
 
@@ -23,7 +25,7 @@ export function ProfileForm({ defaultValues, email }: ProfileFormProps) {
     async (e: React.FormEvent) => {
       e.preventDefault();
       if (fullName.trim().length < 2) {
-        toast.error('Name must be at least 2 characters');
+        toast.error(t('toast.name_min_length'));
         return;
       }
 
@@ -38,41 +40,41 @@ export function ProfileForm({ defaultValues, email }: ProfileFormProps) {
         const data = await res.json();
 
         if (!res.ok) {
-          toast.error(data.message ?? 'Update failed');
+          toast.error(data.message ?? t('toast.update_failed'));
           return;
         }
 
-        toast.success('Profile updated');
+        toast.success(t('toast.profile_updated'));
         router.refresh();
       } catch {
-        toast.error('Something went wrong');
+        toast.error(t('toast.something_wrong'));
       } finally {
         setLoading(false);
       }
     },
-    [fullName, router],
+    [fullName, router, t],
   );
 
   return (
     <Card className="max-w-lg">
       <CardHeader>
-        <CardTitle>Account Details</CardTitle>
+        <CardTitle>{t('profile.account_details')}</CardTitle>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-1.5">
             <label htmlFor="email" className="text-sm font-medium">
-              Email
+              {t('profile.email')}
             </label>
             <Input id="email" value={email} disabled className="bg-muted" />
             <p className="text-muted-foreground text-xs">
-              Email cannot be changed
+              {t('profile.email_readonly')}
             </p>
           </div>
 
           <div className="space-y-1.5">
             <label htmlFor="fullName" className="text-sm font-medium">
-              Full Name
+              {t('profile.full_name')}
             </label>
             <Input
               id="fullName"
@@ -91,7 +93,7 @@ export function ProfileForm({ defaultValues, email }: ProfileFormProps) {
             className="bg-ocean hover:bg-ocean/90 text-white"
           >
             {loading && <Loader2 className="size-3.5 animate-spin" />}
-            Save Changes
+            {t('profile.save')}
           </Button>
         </form>
       </CardContent>

@@ -30,6 +30,16 @@ const navItems = [
     label: 'admin.transactions',
     icon: 'CreditCard' as const,
   },
+  {
+    href: '/admin/receiver-accounts',
+    label: 'admin.receiverAccounts',
+    icon: 'Landmark' as const,
+  },
+  {
+    href: '/admin/feature-flags',
+    label: 'admin.featureFlags',
+    icon: 'ToggleRight' as const,
+  },
 ];
 
 export default function AdminLayout({

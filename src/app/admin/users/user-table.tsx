@@ -1,6 +1,8 @@
 import { type Column, DataTable } from '@/components/data-table';
 import { Badge } from '@/components/ui/badge';
 import { getCurrentUser, requireRole } from '@/lib/auth';
+import { getServerTranslation } from '@/lib/server-translation';
+import { formatRupiah } from '@/lib/currency';
 import { adminService } from '@/services/admin.service';
 
 import { AdminPagination } from '../_components/admin-pagination';
@@ -16,51 +18,51 @@ interface UserRow {
   createdAt: Date;
 }
 
-const columns: Column<UserRow>[] = [
-  {
-    key: 'name',
-    header: 'Name',
-    render: (row) => (
-      <div>
-        <p className="font-medium">{row.fullName}</p>
-        <p className="text-muted-foreground text-xs">{row.email}</p>
-      </div>
-    ),
-  },
-  {
-    key: 'role',
-    header: 'Role',
-    render: (row) => (
-      <Badge variant={row.role === 'ADMIN' ? 'default' : 'secondary'}>
-        {row.role}
-      </Badge>
-    ),
-  },
-  {
-    key: 'balance',
-    header: 'Balance',
-    render: (row) => `$${Number(row.balance).toLocaleString()}`,
-  },
-  {
-    key: 'joined',
-    header: 'Joined',
-    render: (row) => new Date(row.createdAt).toLocaleDateString(),
-  },
-  {
-    key: 'actions',
-    header: '',
-    className: 'text-right',
-    render: (row) => <UserRoleSelect userId={row.id} currentRole={row.role} />,
-  },
-];
-
 interface Props {
   searchParams: Record<string, string | string[] | undefined>;
 }
 
 export async function UserTable({ searchParams }: Props) {
-  const user = await getCurrentUser();
+  const [user, { t }] = await Promise.all([getCurrentUser(), getServerTranslation()]);
   requireRole(user, 'ADMIN');
+
+  const columns: Column<UserRow>[] = [
+    {
+      key: 'name',
+      header: t('admin.users.col_name'),
+      render: (row) => (
+        <div>
+          <p className="font-medium">{row.fullName}</p>
+          <p className="text-muted-foreground text-xs">{row.email}</p>
+        </div>
+      ),
+    },
+    {
+      key: 'role',
+      header: t('admin.users.col_role'),
+      render: (row) => (
+        <Badge variant={row.role === 'ADMIN' ? 'default' : 'secondary'}>
+          {row.role}
+        </Badge>
+      ),
+    },
+    {
+      key: 'balance',
+      header: t('admin.users.col_balance'),
+      render: (row) => formatRupiah(row.balance),
+    },
+    {
+      key: 'joined',
+      header: t('admin.users.col_joined'),
+      render: (row) => new Date(row.createdAt).toLocaleDateString(),
+    },
+    {
+      key: 'actions',
+      header: '',
+      className: 'text-right',
+      render: (row) => <UserRoleSelect userId={row.id} currentRole={row.role} />,
+    },
+  ];
 
   const page = Number(searchParams.page) || 1;
   const search =
@@ -74,12 +76,12 @@ export async function UserTable({ searchParams }: Props) {
 
   return (
     <div className="space-y-4">
-      <SearchForm basePath="/admin/users" placeholder="Search users..." />
+      <SearchForm basePath="/admin/users" placeholder={t('admin.users.search')} />
       <DataTable
         columns={columns}
         data={users}
         keyExtractor={(u) => u.id}
-        emptyMessage="No users found."
+        emptyMessage={t('admin.users.empty')}
       />
       <AdminPagination
         currentPage={page}

@@ -1,5 +1,6 @@
 import { EmptyState } from '@/components/empty-state';
 import { VillaCard } from '@/components/villa-card';
+import { getServerTranslation } from '@/lib/server-translation';
 import type { VillaFilterParams } from '@/types/villa';
 
 import { getVillas } from './actions';
@@ -37,7 +38,10 @@ export async function VillaListingContent({
     page: parseNumberParam(searchParams.page) ?? 1,
   };
 
-  const { villas, total, totalPages, currentPage } = await getVillas(filters);
+  const [{ villas, total, totalPages, currentPage }, { t }] = await Promise.all([
+    getVillas(filters),
+    getServerTranslation(),
+  ]);
 
   const hasActiveFilters =
     filters.search ||
@@ -62,11 +66,11 @@ export async function VillaListingContent({
         </>
       ) : (
         <EmptyState
-          title={hasActiveFilters ? 'No villas found' : 'No villas available'}
+          title={hasActiveFilters ? t('villas.no_villas_found') : t('villas.no_villas_available')}
           description={
             hasActiveFilters
-              ? 'Try adjusting your filters or search terms.'
-              : 'Check back soon for new listings.'
+              ? t('villas.filter_hint')
+              : t('villas.check_back')
           }
         />
       )}

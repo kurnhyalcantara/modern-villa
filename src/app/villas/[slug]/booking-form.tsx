@@ -7,6 +7,8 @@ import { toast } from 'sonner';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { formatRupiah } from '@/lib/currency';
+import { useTranslation } from '@/hooks/use-translation';
 
 interface BookingFormProps {
   villaId: string;
@@ -20,6 +22,7 @@ export function BookingForm({
   maxGuests,
 }: BookingFormProps) {
   const router = useRouter();
+  const { t } = useTranslation();
   const [checkIn, setCheckIn] = useState('');
   const [checkOut, setCheckOut] = useState('');
   const [guests, setGuests] = useState('1');
@@ -40,18 +43,18 @@ export function BookingForm({
       e.preventDefault();
 
       if (!checkIn || !checkOut) {
-        toast.error('Please select check-in and check-out dates');
+        toast.error(t('toast.select_dates'));
         return;
       }
 
       if (nights <= 0) {
-        toast.error('Check-out must be after check-in');
+        toast.error(t('toast.checkout_after_checkin'));
         return;
       }
 
       const guestCount = Number(guests);
       if (guestCount < 1 || guestCount > maxGuests) {
-        toast.error(`Guests must be between 1 and ${maxGuests}`);
+        toast.error(t('toast.guests_range', { max: maxGuests }));
         return;
       }
 
@@ -71,14 +74,14 @@ export function BookingForm({
         const data = await res.json();
 
         if (!res.ok) {
-          toast.error(data.message ?? 'Booking failed');
+          toast.error(data.message ?? t('toast.booking_failed'));
           return;
         }
 
-        toast.success('Booking created! Proceed to payment.');
+        toast.success(t('toast.booking_created'));
         router.push('/dashboard/bookings');
       } catch {
-        toast.error('Something went wrong');
+        toast.error(t('toast.something_wrong'));
       } finally {
         setLoading(false);
       }
@@ -95,7 +98,7 @@ export function BookingForm({
             className="flex items-center gap-1 text-sm font-medium"
           >
             <CalendarDays className="size-3.5" />
-            Check-in
+            {t('booking.checkin')}
           </label>
           <Input
             id="check-in"
@@ -116,7 +119,7 @@ export function BookingForm({
             className="flex items-center gap-1 text-sm font-medium"
           >
             <CalendarDays className="size-3.5" />
-            Check-out
+            {t('booking.checkout')}
           </label>
           <Input
             id="check-out"
@@ -135,7 +138,7 @@ export function BookingForm({
           className="flex items-center gap-1 text-sm font-medium"
         >
           <Users className="size-3.5" />
-          Guests
+          {t('booking.guests')}
         </label>
         <Input
           id="guests"
@@ -147,7 +150,7 @@ export function BookingForm({
           disabled={loading}
         />
         <p className="text-muted-foreground text-xs">
-          Maximum {maxGuests} guests
+          {t('booking.max_guests', { count: maxGuests })}
         </p>
       </div>
 
@@ -155,11 +158,11 @@ export function BookingForm({
         <div className="bg-muted/50 rounded-lg border p-3 text-sm">
           <div className="flex justify-between">
             <span className="text-muted-foreground">
-              ${pricePerNight.toLocaleString()} × {nights}{' '}
-              {nights === 1 ? 'night' : 'nights'}
+              {formatRupiah(pricePerNight)} × {nights}{' '}
+              {nights === 1 ? t('booking.night') : t('booking.nights')}
             </span>
             <span className="font-semibold">
-              ${totalPrice.toLocaleString()}
+              {formatRupiah(totalPrice)}
             </span>
           </div>
         </div>
@@ -173,8 +176,8 @@ export function BookingForm({
       >
         {loading && <Loader2 className="size-4 animate-spin" />}
         {nights > 0
-          ? `Book — $${totalPrice.toLocaleString()}`
-          : 'Select dates to book'}
+          ? t('booking.book_button', { total: formatRupiah(totalPrice) })
+          : t('booking.select_dates')}
       </Button>
     </form>
   );

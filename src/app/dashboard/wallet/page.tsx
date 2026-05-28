@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { Suspense } from 'react';
 
 import { Skeleton } from '@/components/ui/skeleton';
+import { getServerTranslation } from '@/lib/server-translation';
 
 import { WalletContent } from './wallet-content';
 
@@ -9,13 +10,15 @@ export const metadata: Metadata = {
   title: 'Wallet',
 };
 
-export default function WalletPage() {
+export default async function WalletPage() {
+  const { t } = await getServerTranslation();
+
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold tracking-tight">Wallet</h1>
+        <h1 className="text-2xl font-bold tracking-tight">{t('wallet.title')}</h1>
         <p className="text-muted-foreground mt-1">
-          Manage your balance, deposits, and withdrawals
+          {t('wallet.subtitle')}
         </p>
       </div>
 

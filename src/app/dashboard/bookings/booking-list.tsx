@@ -6,6 +6,8 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { BOOKING_STATUS_VARIANT } from '@/constants/booking';
 import { getCurrentUser } from '@/lib/auth';
+import { getServerTranslation } from '@/lib/server-translation';
+import { formatRupiah } from '@/lib/currency';
 import { bookingService } from '@/services/booking.service';
 
 import { BookingActions } from './booking-actions';
@@ -16,7 +18,7 @@ interface BookingListProps {
 }
 
 export async function BookingList({ searchParams }: BookingListProps) {
-  const user = await getCurrentUser();
+  const [user, { t }] = await Promise.all([getCurrentUser(), getServerTranslation()]);
 
   const page = Number(searchParams.page) || 1;
   const status =
@@ -32,14 +34,14 @@ export async function BookingList({ searchParams }: BookingListProps) {
     return (
       <EmptyState
         icon={CalendarDays}
-        title="No bookings yet"
-        description="Start exploring villas and book your next getaway."
+        title={t('bookings.empty_title')}
+        description={t('bookings.empty_description')}
       >
         <Link
           href="/villas"
           className="text-ocean text-sm font-medium hover:underline"
         >
-          Browse villas →
+          {t('bookings.browse')}
         </Link>
       </EmptyState>
     );
@@ -78,7 +80,7 @@ export async function BookingList({ searchParams }: BookingListProps) {
                 </div>
 
                 <p className="text-ocean text-sm font-semibold">
-                  ${Number(booking.totalPrice).toLocaleString()}
+                  {formatRupiah(booking.totalPrice)}
                 </p>
               </div>
 

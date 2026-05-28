@@ -2,6 +2,8 @@ import { MapPin, Star, Users } from 'lucide-react';
 import Link from 'next/link';
 
 import { Separator } from '@/components/ui/separator';
+import { getServerTranslation } from '@/lib/server-translation';
+import { formatRupiah } from '@/lib/currency';
 import type { VillaDetailData } from '@/types/villa';
 
 import { AvailabilityCalendar } from './availability-calendar';
@@ -13,7 +15,8 @@ interface VillaDetailContentProps {
   villa: VillaDetailData;
 }
 
-export function VillaDetailContent({ villa }: VillaDetailContentProps) {
+export async function VillaDetailContent({ villa }: VillaDetailContentProps) {
+  const { t } = await getServerTranslation();
   return (
     <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
       <nav
@@ -23,7 +26,7 @@ export function VillaDetailContent({ villa }: VillaDetailContentProps) {
         <ol className="flex items-center gap-1.5">
           <li>
             <Link href="/" className="hover:text-foreground transition-colors">
-              Home
+              {t('villa.breadcrumb.home')}
             </Link>
           </li>
           <li>/</li>
@@ -32,7 +35,7 @@ export function VillaDetailContent({ villa }: VillaDetailContentProps) {
               href="/villas"
               className="hover:text-foreground transition-colors"
             >
-              Villas
+              {t('villa.breadcrumb.villas')}
             </Link>
           </li>
           <li>/</li>
@@ -56,12 +59,12 @@ export function VillaDetailContent({ villa }: VillaDetailContentProps) {
                 <span className="font-medium">{villa.rating.toFixed(1)}</span>
                 <span className="text-muted-foreground">
                   ({villa.reviewCount}{' '}
-                  {villa.reviewCount === 1 ? 'review' : 'reviews'})
+                  {villa.reviewCount === 1 ? t('villa.review_singular') : t('villa.reviews_plural')})
                 </span>
               </div>
               <div className="text-muted-foreground flex items-center gap-1.5 text-sm">
                 <Users className="size-4" />
-                Up to {villa.maxGuests} guests
+                {t('villa.up_to_guests', { count: villa.maxGuests })}
               </div>
             </div>
           </div>
@@ -69,7 +72,7 @@ export function VillaDetailContent({ villa }: VillaDetailContentProps) {
           <Separator />
 
           <div className="prose prose-sm max-w-none">
-            <h2 className="text-xl font-semibold">About this villa</h2>
+            <h2 className="text-xl font-semibold">{t('villa.about')}</h2>
             <div className="text-muted-foreground mt-3 leading-relaxed whitespace-pre-line">
               {villa.description}
             </div>
@@ -78,7 +81,7 @@ export function VillaDetailContent({ villa }: VillaDetailContentProps) {
           <Separator />
 
           <div>
-            <h2 className="mb-4 text-xl font-semibold">Availability</h2>
+            <h2 className="mb-4 text-xl font-semibold">{t('villa.availability')}</h2>
             <AvailabilityCalendar />
           </div>
 
@@ -95,9 +98,9 @@ export function VillaDetailContent({ villa }: VillaDetailContentProps) {
           <div className="sticky top-24 rounded-xl border p-6 shadow-sm">
             <div className="mb-4">
               <span className="text-ocean text-3xl font-bold">
-                ${villa.pricePerNight.toLocaleString()}
+                {formatRupiah(villa.pricePerNight)}
               </span>
-              <span className="text-muted-foreground text-sm"> / night</span>
+              <span className="text-muted-foreground text-sm"> {t('villa.night_label')}</span>
             </div>
 
             <BookingForm
@@ -110,15 +113,15 @@ export function VillaDetailContent({ villa }: VillaDetailContentProps) {
 
             <div className="space-y-2 text-sm">
               <div className="flex justify-between">
-                <span className="text-muted-foreground">Location</span>
+                <span className="text-muted-foreground">{t('villa.location_label')}</span>
                 <span className="font-medium">{villa.location}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-muted-foreground">Max Guests</span>
+                <span className="text-muted-foreground">{t('villa.max_guests_label')}</span>
                 <span className="font-medium">{villa.maxGuests}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-muted-foreground">Rating</span>
+                <span className="text-muted-foreground">{t('villa.rating_label')}</span>
                 <span className="flex items-center gap-1 font-medium">
                   <Star className="size-3.5 fill-amber-400 text-amber-400" />
                   {villa.rating.toFixed(1)}

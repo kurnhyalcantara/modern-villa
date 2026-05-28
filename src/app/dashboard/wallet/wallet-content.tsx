@@ -4,13 +4,15 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { getCurrentUser } from '@/lib/auth';
+import { getServerTranslation } from '@/lib/server-translation';
+import { formatRupiah } from '@/lib/currency';
 import { financeService } from '@/services/finance.service';
 
 import { DepositForm } from './deposit-form';
 import { WithdrawForm } from './withdraw-form';
 
 export async function WalletContent() {
-  const user = await getCurrentUser();
+  const [user, { t }] = await Promise.all([getCurrentUser(), getServerTranslation()]);
   const { transactions } = await financeService.getTransactionHistory(user.id, {
     page: 1,
     limit: 20,
@@ -24,9 +26,9 @@ export async function WalletContent() {
             <Wallet className="text-ocean size-5" />
           </div>
           <div>
-            <p className="text-muted-foreground text-sm">Current Balance</p>
+            <p className="text-muted-foreground text-sm">{t('wallet.current_balance')}</p>
             <p className="text-ocean text-3xl font-bold">
-              ${Number(user.balance).toLocaleString()}
+              {formatRupiah(user.balance)}
             </p>
           </div>
         </CardHeader>
@@ -39,7 +41,7 @@ export async function WalletContent() {
 
       <Card>
         <CardHeader>
-          <CardTitle>Transaction History</CardTitle>
+          <CardTitle>{t('wallet.transaction_history')}</CardTitle>
         </CardHeader>
         <CardContent>
           {transactions.length > 0 ? (
@@ -67,8 +69,8 @@ export async function WalletContent() {
                             : 'text-red-600'
                         }`}
                       >
-                        {tx.type === 'deposit' ? '+' : '-'}$
-                        {tx.amount.toLocaleString()}
+                        {tx.type === 'deposit' ? '+' : '-'}
+                        {formatRupiah(tx.amount)}
                       </span>
                       <Badge
                         variant={
@@ -90,7 +92,7 @@ export async function WalletContent() {
             </div>
           ) : (
             <p className="text-muted-foreground py-6 text-center text-sm">
-              No transactions yet.
+              {t('wallet.no_transactions')}
             </p>
           )}
         </CardContent>

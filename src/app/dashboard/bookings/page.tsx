@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { Suspense } from 'react';
 
 import { Skeleton } from '@/components/ui/skeleton';
+import { getServerTranslation } from '@/lib/server-translation';
 
 import { BookingList } from './booking-list';
 
@@ -16,14 +17,14 @@ interface BookingsPageProps {
 export default async function BookingsPage({
   searchParams,
 }: BookingsPageProps) {
-  const params = await searchParams;
+  const [params, { t }] = await Promise.all([searchParams, getServerTranslation()]);
 
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold tracking-tight">My Bookings</h1>
+        <h1 className="text-2xl font-bold tracking-tight">{t('bookings.title')}</h1>
         <p className="text-muted-foreground mt-1">
-          View and manage your villa bookings
+          {t('bookings.subtitle')}
         </p>
       </div>
 

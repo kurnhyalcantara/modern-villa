@@ -3,7 +3,10 @@ import { prisma } from '@/lib/prisma';
 
 export const depositRepository = {
   findById(id: string) {
-    return prisma.deposit.findUnique({ where: { id } });
+    return prisma.deposit.findUnique({
+      where: { id },
+      include: { receiverAccount: true, user: { select: { fullName: true, email: true } } },
+    });
   },
 
   create(data: Prisma.DepositCreateInput) {
@@ -32,7 +35,10 @@ export const depositRepository = {
   }) {
     return prisma.deposit.findMany({
       ...params,
-      include: { user: { select: { fullName: true, email: true } } },
+      include: {
+        user: { select: { fullName: true, email: true } },
+        receiverAccount: true,
+      },
     });
   },
 

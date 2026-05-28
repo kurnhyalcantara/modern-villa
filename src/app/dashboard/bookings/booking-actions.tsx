@@ -6,6 +6,7 @@ import { useCallback, useState } from 'react';
 import { toast } from 'sonner';
 
 import { Button } from '@/components/ui/button';
+import { useTranslation } from '@/hooks/use-translation';
 
 interface BookingActionsProps {
   bookingId: string;
@@ -14,6 +15,7 @@ interface BookingActionsProps {
 
 export function BookingActions({ bookingId, status }: BookingActionsProps) {
   const router = useRouter();
+  const { t } = useTranslation();
   const [loading, setLoading] = useState<'pay' | 'cancel' | null>(null);
 
   const handlePay = useCallback(async () => {
@@ -31,18 +33,18 @@ export function BookingActions({ bookingId, status }: BookingActionsProps) {
       const data = await res.json();
 
       if (!res.ok) {
-        toast.error(data.message ?? 'Payment failed');
+        toast.error(data.message ?? t('toast.payment_failed'));
         return;
       }
 
-      toast.success('Payment successful! Booking confirmed.');
+      toast.success(t('toast.payment_success'));
       router.refresh();
     } catch {
-      toast.error('Something went wrong');
+      toast.error(t('toast.something_wrong'));
     } finally {
       setLoading(null);
     }
-  }, [bookingId, router]);
+  }, [bookingId, router, t]);
 
   const handleCancel = useCallback(async () => {
     setLoading('cancel');
@@ -56,18 +58,18 @@ export function BookingActions({ bookingId, status }: BookingActionsProps) {
       const data = await res.json();
 
       if (!res.ok) {
-        toast.error(data.message ?? 'Cancellation failed');
+        toast.error(data.message ?? t('toast.cancel_failed'));
         return;
       }
 
-      toast.success('Booking cancelled successfully.');
+      toast.success(t('toast.booking_cancelled'));
       router.refresh();
     } catch {
-      toast.error('Something went wrong');
+      toast.error(t('toast.something_wrong'));
     } finally {
       setLoading(null);
     }
-  }, [bookingId, router]);
+  }, [bookingId, router, t]);
 
   if (status === 'CANCELLED' || status === 'EXPIRED') {
     return null;
@@ -83,7 +85,7 @@ export function BookingActions({ bookingId, status }: BookingActionsProps) {
           disabled={loading !== null}
         >
           {loading === 'pay' && <Loader2 className="size-3.5 animate-spin" />}
-          Pay Now
+          {t('bookings.pay_now')}
         </Button>
       )}
 
@@ -97,7 +99,7 @@ export function BookingActions({ bookingId, status }: BookingActionsProps) {
           {loading === 'cancel' && (
             <Loader2 className="size-3.5 animate-spin" />
           )}
-          Cancel
+          {t('bookings.cancel')}
         </Button>
       )}
     </div>

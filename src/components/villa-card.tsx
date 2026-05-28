@@ -6,6 +6,7 @@ import Link from 'next/link';
 
 import { Card, CardContent } from '@/components/ui/card';
 import { useTranslation } from '@/hooks/use-translation';
+import { formatRupiah } from '@/lib/currency';
 import type { VillaCardData } from '@/types/villa';
 
 interface VillaCardProps {
@@ -55,7 +56,7 @@ export function VillaCard({ villa }: VillaCardProps) {
             </div>
             <div className="text-right">
               <span className="text-ocean text-lg font-bold">
-                ${villa.pricePerNight.toLocaleString()}
+                {formatRupiah(villa.pricePerNight)}
               </span>
               <span className="text-muted-foreground text-xs">
                 {' '}

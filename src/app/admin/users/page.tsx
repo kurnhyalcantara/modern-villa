@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { Suspense } from 'react';
 
 import { DataTableSkeleton } from '@/components/data-table';
+import { getServerTranslation } from '@/lib/server-translation';
 
 import { UserTable } from './user-table';
 
@@ -12,14 +13,14 @@ interface Props {
 }
 
 export default async function AdminUsersPage({ searchParams }: Props) {
-  const params = await searchParams;
+  const [params, { t }] = await Promise.all([searchParams, getServerTranslation()]);
 
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold tracking-tight">User Management</h1>
+        <h1 className="text-2xl font-bold tracking-tight">{t('admin.users.title')}</h1>
         <p className="text-muted-foreground mt-1">
-          Manage users and their roles
+          {t('admin.users.subtitle')}
         </p>
       </div>
       <Suspense fallback={<DataTableSkeleton />}>
